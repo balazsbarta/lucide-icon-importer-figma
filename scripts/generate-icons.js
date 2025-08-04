@@ -1,13 +1,54 @@
 // Script to generate the complete Lucide icons data for the Figma plugin
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 // Import the lucide library
 const lucide = require('lucide');
 
 console.log('Generating Lucide icons data...');
 
-// Function to get official Lucide metadata for an icon
+// Function to fetch official Lucide metadata from GitHub
+async function fetchOfficialLucideMetadata(iconName) {
+  return new Promise((resolve) => {
+    try {
+      // Convert PascalCase to kebab-case for file lookup
+      const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+      
+      // URL to the official Lucide metadata on GitHub
+      const metadataUrl = `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${kebabName}.json`;
+      
+      https.get(metadataUrl, (res) => {
+        if (res.statusCode === 200) {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            try {
+              const metadata = JSON.parse(data);
+              resolve({
+                tags: metadata.tags || [],
+                categories: metadata.categories || [],
+                contributors: metadata.contributors || []
+              });
+            } catch (error) {
+              resolve({ tags: [], categories: [], contributors: [] });
+            }
+          });
+        } else {
+          resolve({ tags: [], categories: [], contributors: [] });
+        }
+      }).on('error', () => {
+        resolve({ tags: [], categories: [], contributors: [] });
+      });
+    } catch (error) {
+      resolve({ tags: [], categories: [], contributors: [] });
+    }
+  });
+}
+
+// Function to get official Lucide metadata for an icon (local fallback)
 function getOfficialLucideMetadata(iconName) {
   try {
     // Convert PascalCase to kebab-case for file lookup
@@ -20,14 +61,37 @@ function getOfficialLucideMetadata(iconName) {
       const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
       return {
         tags: metadata.tags || [],
-        categories: metadata.categories || []
+        categories: metadata.categories || [],
+        contributors: metadata.contributors || []
       };
+    } else {
+      // Try alternative naming patterns if the standard one doesn't work
+      const alternativeNames = [
+        iconName.toLowerCase(), // lowercase
+        iconName, // original PascalCase
+        kebabName.replace(/-/g, '_') // snake_case
+      ];
+      
+      for (const altName of alternativeNames) {
+        const altPath = path.join(__dirname, '../node_modules/lucide/icons', `${altName}.json`);
+        if (fs.existsSync(altPath)) {
+          const metadata = JSON.parse(fs.readFileSync(altPath, 'utf8'));
+          return {
+            tags: metadata.tags || [],
+            categories: metadata.categories || [],
+            contributors: metadata.contributors || []
+          };
+        }
+      }
     }
   } catch (error) {
-    console.warn(`Could not load metadata for ${iconName}:`, error.message);
+    // Only log if it's not a simple file not found case
+    if (error.code !== 'ENOENT') {
+      console.warn(`Could not load metadata for ${iconName}:`, error.message);
+    }
   }
   
-  return { tags: [], categories: [] };
+  return { tags: [], categories: [], contributors: [] };
 }
 
 const allIcons = {};
@@ -41,7 +105,7 @@ function lucideToSvg(iconData) {
   const [tagName, attributes, children] = iconData;
   if (tagName !== 'svg') return null;
   
-  // Convert children to SVG elements (keep original structure)
+  // Convert children to SVG elements (preserve original positioning)
   function renderChildren(children) {
     if (!Array.isArray(children)) return '';
     
@@ -49,7 +113,7 @@ function lucideToSvg(iconData) {
       if (Array.isArray(child) && child.length >= 2) {
         const [childTag, childAttrs, childChildren] = child;
         
-        // Convert attributes object to string
+        // Convert attributes object to string - preserve all original attributes
         const attrString = Object.entries(childAttrs || {})
           .map(([key, value]) => `${key}="${value}"`)
           .join(' ');
@@ -64,12 +128,14 @@ function lucideToSvg(iconData) {
     }).join('');
   }
   
-  // Convert attributes to string
+  // Preserve original SVG attributes exactly as they are
+  // This maintains the intended positioning and viewBox
   const attrString = Object.entries(attributes)
     .map(([key, value]) => `${key}="${value}"`)
     .join(' ');
   
-  // Return SVG with original structure (let Figma handle flattening)
+  // Return SVG with original structure and positioning preserved
+  // Do NOT modify viewBox, width, height, or any positioning attributes
   return `<svg ${attrString}>${renderChildren(children)}</svg>`;
 }
 
@@ -189,23 +255,59 @@ function getIconKeywords(iconName) {
     'gift': ['present', 'surprise', 'birthday', 'celebration', 'holiday', 'package', 'reward', 'giving'],
     
     // Health & Medical
-    'heart': ['health', 'medical', 'cardiology', 'life', 'vital', 'pulse', 'healthcare'],
     'activity': ['health', 'fitness', 'exercise', 'heartbeat', 'vital', 'monitor'],
     'pill': ['medicine', 'drug', 'medication', 'health', 'pharmacy', 'treatment'],
     'thermometer': ['temperature', 'fever', 'health', 'medical', 'measure', 'heat'],
+    'stethoscope': ['medical', 'doctor', 'health', 'diagnosis', 'healthcare', 'physician'],
+    'hospital': ['medical', 'health', 'care', 'emergency', 'treatment', 'clinic'],
+    'bandage': ['medical', 'injury', 'wound', 'first-aid', 'healing', 'healthcare'],
     
     // Education & Learning
     'book': ['read', 'literature', 'education', 'knowledge', 'study', 'novel', 'library', 'learning'],
     'graduation-cap': ['education', 'university', 'degree', 'learning', 'student', 'achievement'],
     'bookmark': ['save', 'mark', 'remember', 'favorite', 'reference', 'note'],
     'pencil': ['write', 'edit', 'draw', 'sketch', 'note', 'school', 'creative'],
+    'book-open': ['reading', 'study', 'education', 'knowledge', 'learning', 'text'],
+    'library': ['books', 'education', 'study', 'knowledge', 'research', 'archive'],
+    
+    // Business & Finance
+    'briefcase': ['business', 'work', 'professional', 'office', 'career', 'job'],
+    'building': ['office', 'business', 'company', 'corporate', 'workplace', 'structure'],
+    'chart': ['analytics', 'data', 'statistics', 'business', 'graph', 'report'],
+    'trending-up': ['growth', 'increase', 'profit', 'success', 'analytics', 'chart'],
+    'trending-down': ['decline', 'decrease', 'loss', 'analytics', 'chart', 'drop'],
+    'calculator': ['math', 'finance', 'accounting', 'numbers', 'business', 'compute'],
     
     // Alerts & Status
     'alert-triangle': ['warning', 'caution', 'danger', 'attention', 'error', 'important'],
     'info': ['information', 'details', 'help', 'about', 'question', 'explain'],
     'check-circle': ['success', 'complete', 'done', 'approved', 'verified', 'confirmed'],
     'x-circle': ['error', 'failed', 'cancel', 'remove', 'delete', 'wrong'],
-    'bell': ['notification', 'alert', 'reminder', 'alarm', 'ring', 'sound']
+    'bell': ['notification', 'alert', 'reminder', 'alarm', 'ring', 'sound'],
+    
+    // Gaming & Entertainment
+    'gamepad': ['gaming', 'controller', 'play', 'entertainment', 'console', 'joystick'],
+    'dice': ['gaming', 'random', 'chance', 'game', 'gambling', 'probability'],
+    'trophy': ['award', 'achievement', 'winner', 'success', 'prize', 'victory'],
+    'medal': ['award', 'achievement', 'honor', 'recognition', 'prize', 'success'],
+    
+    // Construction & Tools
+    'hammer': ['tool', 'construction', 'build', 'repair', 'craft', 'work'],
+    'wrench': ['tool', 'repair', 'fix', 'maintenance', 'mechanical', 'adjust'],
+    'screwdriver': ['tool', 'repair', 'fix', 'construction', 'maintenance', 'build'],
+    'drill': ['tool', 'construction', 'hole', 'build', 'work', 'power-tool'],
+    
+    // Maps & Location
+    'map': ['location', 'geography', 'navigation', 'travel', 'directions', 'place'],
+    'map-pin': ['location', 'marker', 'place', 'position', 'coordinates', 'pin'],
+    'compass': ['direction', 'navigation', 'north', 'orientation', 'travel', 'guide'],
+    'globe': ['world', 'earth', 'international', 'global', 'planet', 'geography'],
+    
+    // Furniture & Home
+    'sofa': ['furniture', 'home', 'living-room', 'comfort', 'seating', 'couch'],
+    'bed': ['furniture', 'sleep', 'bedroom', 'rest', 'home', 'comfort'],
+    'lamp': ['light', 'illumination', 'furniture', 'home', 'bright', 'bulb'],
+    'door': ['entrance', 'exit', 'home', 'access', 'portal', 'gateway']
   };
   
   // Start with base keywords from the icon name
@@ -311,44 +413,91 @@ const iconNames = allKeys.filter(key => {
 
 console.log(`Found ${iconNames.length} potential Lucide icons:`, iconNames.slice(0, 10));
 
-for (const iconName of iconNames) {
-  try {
-    const iconData = lucide[iconName];
-    const svgString = lucideToSvg(iconData);
+// Process all icons with enhanced fallback keywords (skip GitHub for now)
+function processAllIcons() {
+  console.log('Processing all icons with enhanced fallback keywords...');
+  
+  for (let i = 0; i < iconNames.length; i++) {
+    const iconName = iconNames[i];
     
-    if (svgString) {
-      // Convert PascalCase to kebab-case for consistency
-      const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+    try {
+      const iconData = lucide[iconName];
+      const svgString = lucideToSvg(iconData);
       
-      allIcons[kebabName] = {
-        name: kebabName,
-        svg: svgString,
-        keywords: getIconKeywords(iconName),
-        categories: []
-      };
-      
-      processedCount++;
+      if (svgString) {
+        // Convert PascalCase to kebab-case for consistency
+        const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+        
+        // Use enhanced fallback keywords
+        const keywords = getIconKeywords(iconName);
+        
+        // Create description
+        const description = `${kebabName} icon from Lucide`;
+        
+        allIcons[kebabName] = {
+          name: kebabName,
+          svg: svgString,
+          keywords: keywords,
+          categories: [],
+          description: description,
+          hasOfficialTags: false,
+          // Preserve original positioning - don't force centering in Figma
+          preservePositioning: true,
+          // Store original viewBox for reference
+          originalViewBox: iconData[1]?.viewBox || '0 0 24 24'
+        };
+        
+        processedCount++;
+        
+        // Progress update every 200 icons
+        if (processedCount % 200 === 0) {
+          console.log(`Processed ${processedCount}/${iconNames.length} icons...`);
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to process icon ${iconName}:`, error.message);
+      errorCount++;
     }
-  } catch (error) {
-    console.warn(`Failed to process icon ${iconName}:`, error.message);
-    errorCount++;
   }
 }
 
+// Run the processing
+processAllIcons();
+
 console.log(`Successfully processed ${processedCount} icons`);
 console.log(`Errors: ${errorCount}`);
+
+// All icons use fallback tags since we're not using GitHub API
+const iconsWithOfficialTags = 0;
+const iconsWithFallbackTags = processedCount;
+
+console.log(`Icons with official Lucide tags: ${iconsWithOfficialTags}`);
+console.log(`Icons using enhanced fallback tags: ${iconsWithFallbackTags}`);
+console.log(`Note: Positioning preserved from original Lucide SVGs`);
 
 // Generate TypeScript content
 const tsContent = `// Auto-generated Lucide icons data for Figma plugin
 // Generated on ${new Date().toISOString()}
 // Total icons: ${processedCount}
+// Icons with official tags: ${iconsWithOfficialTags}
+// Icons with fallback tags: ${iconsWithFallbackTags}
+// Note: Original positioning preserved
 
 export const LUCIDE_ICONS_DATA = ${JSON.stringify(allIcons, null, 2)};
 `;
 
-// Write to TypeScript file
-const outputPath = path.join(__dirname, '../src/lucide-icons-data.ts');
-fs.writeFileSync(outputPath, tsContent);
+// Generate JSON content for require() import
+const jsonContent = JSON.stringify(allIcons, null, 2);
 
-console.log(`Generated ${outputPath} with ${processedCount} icons`);
-console.log(`File size: ${(fs.statSync(outputPath).size / 1024 / 1024).toFixed(2)} MB`);
+// Write to TypeScript file
+const tsOutputPath = path.join(__dirname, '../src/lucide-icons-data.ts');
+fs.writeFileSync(tsOutputPath, tsContent);
+
+// Write to JSON file
+const jsonOutputPath = path.join(__dirname, '../src/icons.json');
+fs.writeFileSync(jsonOutputPath, jsonContent);
+
+console.log(`Generated ${tsOutputPath} with ${processedCount} icons`);
+console.log(`Generated ${jsonOutputPath} with ${processedCount} icons`);
+console.log(`TS file size: ${(fs.statSync(tsOutputPath).size / 1024 / 1024).toFixed(2)} MB`);
+console.log(`JSON file size: ${(fs.statSync(jsonOutputPath).size / 1024 / 1024).toFixed(2)} MB`);

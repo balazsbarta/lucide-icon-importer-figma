@@ -45,14 +45,6 @@ async function importLucideIcons(options: ImportOptions) {
   // Create a new page for the icons
   const iconPage = figma.createPage();
   iconPage.name = 'Lucide Icons';
-  
-  // Set page background color to #ededed
-  iconPage.backgrounds = [{
-    type: 'SOLID',
-    color: { r: 0.929, g: 0.929, b: 0.929 }, // #ededed in RGB (237/255 = 0.929)
-    visible: true
-  }];
-  
   figma.currentPage = iconPage;
   console.log('Created new page:', iconPage.name);
 
@@ -195,21 +187,13 @@ async function createComponentFromSvg(svgNode: FrameNode, iconName: string, icon
       const vectorClone = flattenedNode.clone();
       vectorClone.name = "Vector"; // Consistent naming for all vectors
       
-      // Add the vector to the component first
+      // Add it to the component first
       component.appendChild(vectorClone);
       
-      // Center the vector within the 24x24 component
-      // Get the bounds of the vector content
-      const vectorBounds = vectorClone.width && vectorClone.height ? 
-        { width: vectorClone.width, height: vectorClone.height } : 
-        { width: 24, height: 24 }; // fallback
-      
-      // Calculate center position within 24x24 frame
-      const centerX = (24 - vectorBounds.width) / 2;
-      const centerY = (24 - vectorBounds.height) / 2;
-      
-      vectorClone.x = centerX;
-      vectorClone.y = centerY;
+      // PRESERVE ORIGINAL POSITIONING - Do NOT center the vector
+      // The original Lucide SVG positioning should be maintained
+      // This ensures icons like wifi signals, arrows, etc. maintain their intended alignment
+      // vectorClone.x and vectorClone.y will maintain their original SVG coordinates
       
       // Set component description with keywords
       if (options.includeKeywords && iconData.keywords.length > 0) {
