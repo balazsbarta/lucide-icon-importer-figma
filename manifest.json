@@ -1,8 +1,9 @@
 {
   "name": "Lucide Icon Importer",
-  "id": "lucide-icon-importer",
+  "id": "1534177137015708208",
   "api": "1.0.0",
   "main": "dist/code.js",
+  "documentAccess": "dynamic-page",
   "capabilities": [],
   "enableProposedApi": false,
   "editorType": [

@@ -72,21 +72,6 @@
       width: 0%;
       transition: width 0.3s ease;
     }
-    
-    .options {
-      margin-bottom: 20px;
-    }
-    
-    .checkbox {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    
-    .checkbox input {
-      margin-right: 8px;
-    }
   </style>
 </head>
 <body>
@@ -95,21 +80,6 @@
     <p class="description">
       Import all Lucide icons as flattened vector components with descriptions and keywords.
     </p>
-    
-    <div class="options">
-      <div class="checkbox">
-        <input type="checkbox" id="createComponents" checked>
-        <label for="createComponents">Create components from icons</label>
-      </div>
-      <div class="checkbox">
-        <input type="checkbox" id="includeKeywords" checked>
-        <label for="includeKeywords">Include keywords in descriptions</label>
-      </div>
-      <div class="checkbox">
-        <input type="checkbox" id="organizeByCategory">
-        <label for="organizeByCategory">Organize by category (if available)</label>
-      </div>
-    </div>
     
     <button class="button" id="import-btn">Import All Icons</button>
     
@@ -138,13 +108,7 @@
       importBtn.addEventListener('click', () => {
         console.log('Import button clicked');
         
-        const options = {
-          createComponents: document.getElementById('createComponents').checked,
-          includeKeywords: document.getElementById('includeKeywords').checked,
-          organizeByCategory: document.getElementById('organizeByCategory').checked,
-        };
-        
-        console.log('Options:', options);
+        console.log('Starting import');
         
         importBtn.disabled = true;
         progressDiv.style.display = 'block';
@@ -152,8 +116,7 @@
         console.log('Sending message to parent');
         parent.postMessage({
           pluginMessage: {
-            type: 'import-icons',
-            options
+            type: 'import-icons'
           }
         }, '*');
       });

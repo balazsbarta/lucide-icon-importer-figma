@@ -13,20 +13,14 @@ console.log('Lucide Icon Importer plugin loaded');
 // This shows the HTML page in "ui.html"
 figma.showUI(__html__, { width: 360, height: 500 });
 
-interface ImportOptions {
-  createComponents: boolean;
-  includeKeywords: boolean;
-  organizeByCategory: boolean;
-}
-
 // Listen for messages from the UI
 figma.ui.onmessage = async (msg: any) => {
   console.log('Received message:', msg);
   
   if (msg.type === 'import-icons') {
-    console.log('Starting icon import with options:', msg.options);
+    console.log('Starting icon import');
     try {
-      await importLucideIcons(msg.options);
+      await importLucideIcons();
       console.log('Icon import completed successfully');
       figma.ui.postMessage({ type: 'complete' });
     } catch (error) {
@@ -39,13 +33,13 @@ figma.ui.onmessage = async (msg: any) => {
   }
 };
 
-async function importLucideIcons(options: ImportOptions) {
-  console.log('importLucideIcons function started with options:', options);
+async function importLucideIcons() {
+  console.log('importLucideIcons function started');
   
   // Create a new page for the icons
   const iconPage = figma.createPage();
   iconPage.name = 'Lucide Icons';
-  figma.currentPage = iconPage;
+  await figma.setCurrentPageAsync(iconPage);
   console.log('Created new page:', iconPage.name);
 
   // Get all Lucide icons data
@@ -88,13 +82,8 @@ async function importLucideIcons(options: ImportOptions) {
         svgNode.y = currentY;
         // Don't resize the SVG node - keep original proportions
         
-        // Create component directly from the SVG node if option is enabled
-        if (options.createComponents) {
-          await createComponentFromSvg(svgNode, iconName, iconData, options, currentX, currentY);
-        } else {
-          // If not creating components, just add the SVG to the page
-          figma.currentPage.appendChild(svgNode);
-        }
+        // Create component directly from the SVG node
+        await createComponentFromSvg(svgNode, iconName, iconData, currentX, currentY);
       }
       
       // Update grid position
@@ -142,7 +131,7 @@ async function createVectorFromSvg(svgString: string, iconName: string): Promise
   }
 }
 
-async function createComponentFromSvg(svgNode: FrameNode, iconName: string, iconData: LucideIconData, options: ImportOptions, x: number, y: number): Promise<void> {
+async function createComponentFromSvg(svgNode: FrameNode, iconName: string, iconData: LucideIconData, x: number, y: number): Promise<void> {
   try {
     // First, flatten all the vector paths in the SVG node
     const vectorNodes: VectorNode[] = [];
@@ -196,7 +185,7 @@ async function createComponentFromSvg(svgNode: FrameNode, iconName: string, icon
       // vectorClone.x and vectorClone.y will maintain their original SVG coordinates
       
       // Set component description with keywords
-      if (options.includeKeywords && iconData.keywords.length > 0) {
+      if (iconData.keywords.length > 0) {
         component.description = iconData.keywords.join(', ');
       } else {
         component.description = `Lucide icon: ${iconName}`;
@@ -226,7 +215,7 @@ async function createComponentFromSvg(svgNode: FrameNode, iconName: string, icon
       }
       
       // Set component description with keywords
-      if (options.includeKeywords && iconData.keywords.length > 0) {
+      if (iconData.keywords.length > 0) {
         component.description = iconData.keywords.join(', ');
       } else {
         component.description = `Lucide icon: ${iconName}`;

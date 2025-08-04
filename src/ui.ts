@@ -1,12 +1,6 @@
 // UI script that runs in the plugin's iframe
 console.log('UI loaded');
 
-interface ImportOptions {
-  createComponents: boolean;
-  includeKeywords: boolean;
-  organizeByCategory: boolean;
-}
-
 const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
 const progressDiv = document.getElementById('progress') as HTMLDivElement;
 const progressFill = document.getElementById('progress-fill') as HTMLDivElement;
@@ -15,13 +9,7 @@ const progressText = document.getElementById('progress-text') as HTMLDivElement;
 importBtn.addEventListener('click', () => {
   console.log('Import button clicked');
   
-  const options: ImportOptions = {
-    createComponents: (document.getElementById('createComponents') as HTMLInputElement).checked,
-    includeKeywords: (document.getElementById('includeKeywords') as HTMLInputElement).checked,
-    organizeByCategory: (document.getElementById('organizeByCategory') as HTMLInputElement).checked,
-  };
-  
-  console.log('Options:', options);
+  console.log('Starting import');
   
   importBtn.disabled = true;
   progressDiv.style.display = 'block';
@@ -29,8 +17,7 @@ importBtn.addEventListener('click', () => {
   console.log('Sending message to parent');
   parent.postMessage({
     pluginMessage: {
-      type: 'import-icons',
-      options
+      type: 'import-icons'
     }
   }, '*');
 });
