@@ -1,0 +1,18 @@
+{
+  "name": "Lucide Icon Importer",
+  "id": "lucide-icon-importer",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "menu": [
+    {
+      "name": "Import All Lucide Icons",
+      "command": "import-lucide-icons"
+    }
+  ]
+}

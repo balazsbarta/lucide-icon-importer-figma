@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Lucide Icon Importer</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #ffffff;
+    }
+    
+    .container {
+      max-width: 320px;
+    }
+    
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 16px 0;
+      color: #333;
+    }
+    
+    .description {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    
+    .button {
+      background: #18a0fb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    
+    .button:hover {
+      background: #0d8ce8;
+    }
+    
+    .button:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+    }
+    
+    .progress {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #f0f0f0;
+      border-radius: 2px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #18a0fb;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .options {
+      margin-bottom: 20px;
+    }
+    
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    
+    .checkbox input {
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lucide Icon Importer</h1>
+    <p class="description">
+      Import all Lucide icons as flattened vector components with descriptions and keywords.
+    </p>
+    
+    <div class="options">
+      <div class="checkbox">
+        <input type="checkbox" id="createComponents" checked>
+        <label for="createComponents">Create components from icons</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="includeKeywords" checked>
+        <label for="includeKeywords">Include keywords in descriptions</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="organizeByCategory">
+        <label for="organizeByCategory">Organize by category (if available)</label>
+      </div>
+    </div>
+    
+    <button class="button" id="import-btn">Import All Icons</button>
+    
+    <div class="progress" id="progress" style="display: none;">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div id="progress-text">Preparing...</div>
+    </div>
+  </div>
+  
+  <script>
+    // UI script that runs in the plugin's iframe
+    console.log('UI loaded');
+
+    const importBtn = document.getElementById('import-btn');
+    const progressDiv = document.getElementById('progress');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    if (!importBtn) {
+      console.error('Import button not found!');
+    } else {
+      console.log('Import button found, adding event listener');
+      
+      importBtn.addEventListener('click', () => {
+        console.log('Import button clicked');
+        
+        const options = {
+          createComponents: document.getElementById('createComponents').checked,
+          includeKeywords: document.getElementById('includeKeywords').checked,
+          organizeByCategory: document.getElementById('organizeByCategory').checked,
+        };
+        
+        console.log('Options:', options);
+        
+        importBtn.disabled = true;
+        progressDiv.style.display = 'block';
+        
+        console.log('Sending message to parent');
+        parent.postMessage({
+          pluginMessage: {
+            type: 'import-icons',
+            options
+          }
+        }, '*');
+      });
+    }
+
+    // Listen for messages from the main thread
+    window.onmessage = (event) => {
+      console.log('UI received message:', event.data);
+      const { type, data } = event.data.pluginMessage || {};
+      
+      switch (type) {
+        case 'progress':
+          updateProgress(data.current, data.total, data.message);
+          break;
+        case 'complete':
+          importBtn.disabled = false;
+          progressDiv.style.display = 'none';
+          console.log('Import completed');
+          break;
+        case 'error':
+          importBtn.disabled = false;
+          progressDiv.style.display = 'none';
+          alert(`Error: ${data.message}`);
+          break;
+      }
+    };
+
+    function updateProgress(current, total, message) {
+      const percentage = Math.round((current / total) * 100);
+      progressFill.style.width = `${percentage}%`;
+      progressText.textContent = `${message} (${current}/${total})`;
+    }
+  </script>
+</body>
+</html>
