@@ -4,6 +4,9 @@
   "api": "1.0.0",
   "main": "dist/code.js",
   "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
   "capabilities": [],
   "enableProposedApi": false,
   "editorType": [
