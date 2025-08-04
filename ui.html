@@ -1,154 +1,225 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Lucide Icon Importer</title>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #ffffff;
-    }
-    
-    .container {
-      max-width: 320px;
-    }
-    
-    h1 {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0 0 16px 0;
-      color: #333;
-    }
-    
-    .description {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-    
-    .button {
-      background: #18a0fb;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 12px;
-    }
-    
-    .button:hover {
-      background: #0d8ce8;
-    }
-    
-    .button:disabled {
-      background: #ddd;
-      cursor: not-allowed;
-    }
-    
-    .progress {
-      margin-top: 16px;
-      font-size: 12px;
-      color: #666;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 4px;
-      background: #f0f0f0;
-      border-radius: 2px;
-      margin: 8px 0;
-      overflow: hidden;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: #18a0fb;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Lucide Icon Importer</h1>
-    <p class="description">
-      Import all Lucide icons as flattened vector components with descriptions and keywords.
-    </p>
-    
-    <button class="button" id="import-btn">Import All Icons</button>
-    
-    <div class="progress" id="progress" style="display: none;">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
-      <div id="progress-text">Preparing...</div>
-    </div>
-  </div>
-  
-  <script>
-    // UI script that runs in the plugin's iframe
-    console.log('UI loaded');
-
-    const importBtn = document.getElementById('import-btn');
-    const progressDiv = document.getElementById('progress');
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-
-    if (!importBtn) {
-      console.error('Import button not found!');
-    } else {
-      console.log('Import button found, adding event listener');
-      
-      importBtn.addEventListener('click', () => {
-        console.log('Import button clicked');
-        
-        console.log('Starting import');
-        
-        importBtn.disabled = true;
-        progressDiv.style.display = 'block';
-        
-        console.log('Sending message to parent');
-        parent.postMessage({
-          pluginMessage: {
-            type: 'import-icons'
-          }
-        }, '*');
-      });
-    }
-
-    // Listen for messages from the main thread
-    window.onmessage = (event) => {
-      console.log('UI received message:', event.data);
-      const { type, data } = event.data.pluginMessage || {};
-      
-      switch (type) {
-        case 'progress':
-          updateProgress(data.current, data.total, data.message);
-          break;
-        case 'complete':
-          importBtn.disabled = false;
-          progressDiv.style.display = 'none';
-          console.log('Import completed');
-          break;
-        case 'error':
-          importBtn.disabled = false;
-          progressDiv.style.display = 'none';
-          alert(`Error: ${data.message}`);
-          break;
+  <head>
+    <meta charset="utf-8" />
+    <title>Lucide Icon Importer</title>
+    <style>
+      body {
+        margin: 0;
+        background: #202127;
+        color: #98989f;
+        padding: 24px;
+        font-family: "Inter", sans-serif;
       }
-    };
 
-    function updateProgress(current, total, message) {
-      const percentage = Math.round((current / total) * 100);
-      progressFill.style.width = `${percentage}%`;
-      progressText.textContent = `${message} (${current}/${total})`;
-    }
-  </script>
-</body>
+      .logo-wrapper {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 24px;
+      }
+
+      .logo {
+        width: 40px;
+        height: 40px;
+      }
+
+      .container {
+        max-width: 320px;
+      }
+
+      h1 {
+        margin: 0 0 24px 0;
+        color: #dfdfd6;
+        line-height: 24px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .description {
+        margin-bottom: 20px;
+        line-height: 24px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      a {
+        font-weight: 500;
+        color: #f67373;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: color 0.25s, opacity 0.25s;
+      }
+
+      a:hover {
+        color: #ff7070;
+      }
+
+      .button {
+        border-radius: 20px;
+        padding: 12px 20px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        background: #f56565;
+        color: #fff;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        margin-top: 40px;
+      }
+
+      .button:hover {
+        background: #ff7070;
+      }
+
+      .button:disabled {
+        cursor: not-allowed;
+        background: #ddd;
+      }
+
+      .progress {
+        margin-top: 16px;
+        color: #666;
+        font-size: 12px;
+      }
+
+      .progress-bar {
+        margin: 8px 0;
+        border-radius: 2px;
+        background: #f0f0f0;
+        width: 100%;
+        height: 4px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        transition: width 0.3s ease;
+        background: #18a0fb;
+        width: 0%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo-wrapper">
+        <svg
+        class="logo"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        id="lucide-logo"
+      >
+        <path
+          d="M14 12C14 9.79086 12.2091 8 10 8C7.79086 8 6 9.79086 6 12C6 16.4183 9.58172 20 14 20C18.4183 20 22 16.4183 22 12C22 8.446 20.455 5.25285 18 3.05557"
+          stroke="#fff"
+        />
+        <path
+          d="M10 12C10 14.2091 11.7909 16 14 16C16.2091 16 18 14.2091 18 12C18 7.58172 14.4183 4 10 4C5.58172 4 2 7.58172 2 12C2 15.5841 3.57127 18.8012 6.06253 21"
+          stroke="#F56565"
+        />
+      </svg>
+      </div>
+      <h1>Lucide Icon Importer</h1>
+      <p class="description">
+        This tool imports the entire
+        <a target="_blank" href="https://lucide.dev/">Lucide icon library</a>
+        into your project with the following features:
+      </p>
+      <ul class="description">
+        <li>
+          Imports all available Lucide icons as flattened vector components.
+        </li>
+        <li>
+          Includes the official tags for each icon in the component description.
+        </li>
+        <li>
+          Creates a new "Lucide Icons" page, organizing the components in a
+          20-column grid.
+        </li>
+      </ul>
+
+      <button class="button" id="import-btn">Import All Icons</button>
+
+      <div class="progress" id="progress" style="display: none">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div id="progress-text">Preparing...</div>
+      </div>
+    </div>
+
+    <script>
+      // UI script that runs in the plugin's iframe
+      console.log("UI loaded");
+
+      const importBtn = document.getElementById("import-btn");
+      const progressDiv = document.getElementById("progress");
+      const progressFill = document.getElementById("progress-fill");
+      const progressText = document.getElementById("progress-text");
+
+      if (!importBtn) {
+        console.error("Import button not found!");
+      } else {
+        console.log("Import button found, adding event listener");
+
+        importBtn.addEventListener("click", () => {
+          console.log("Import button clicked");
+
+          console.log("Starting import");
+
+          importBtn.disabled = true;
+          progressDiv.style.display = "block";
+
+          console.log("Sending message to parent");
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "import-icons",
+              },
+            },
+            "*"
+          );
+        });
+      }
+
+      // Listen for messages from the main thread
+      window.onmessage = (event) => {
+        console.log("UI received message:", event.data);
+        const { type, data } = event.data.pluginMessage || {};
+
+        switch (type) {
+          case "progress":
+            updateProgress(data.current, data.total, data.message);
+            break;
+          case "complete":
+            importBtn.disabled = false;
+            progressDiv.style.display = "none";
+            console.log("Import completed");
+            break;
+          case "error":
+            importBtn.disabled = false;
+            progressDiv.style.display = "none";
+            alert(`Error: ${data.message}`);
+            break;
+        }
+      };
+
+      function updateProgress(current, total, message) {
+        const percentage = Math.round((current / total) * 100);
+        progressFill.style.width = `${percentage}%`;
+        progressText.textContent = `${message} (${current}/${total})`;
+      }
+    </script>
+  </body>
 </html>
