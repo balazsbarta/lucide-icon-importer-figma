@@ -20,16 +20,12 @@
 ## Using the Plugin
 
 1. **Open the Plugin**: `Plugins` → `Lucide Icon Importer` → `Import All Lucide Icons`
-2. **Choose Your Options**:
-   - ✅ Create components from icons (recommended)
-   - ✅ Include keywords in descriptions (recommended for searchability)
-   - ⬜ Organize by category (future feature)
-3. **Click "Import All Icons"** and wait for completion
-4. **Find Your Icons**: A new page called "Lucide Icons" will be created with all icons
+2. **Click "Import All Icons"** and wait for completion
+3. **Find Your Icons**: A new page called "Lucide Icons" will be created with all icons
 
 ## What You'll Get
 
-- **1,000+ Icons**: All Lucide icons imported as vector shapes
+- **1,700+ Icons**: All Lucide icons imported as vector shapes
 - **Components**: Each icon becomes a reusable component
 - **Rich Metadata**: Searchable keywords and descriptions
 - **Perfect Vectors**: Single-path vectors ready for customization
@@ -40,8 +36,6 @@
 - **Search Components**: Use Figma's component search with keywords like "arrow", "user", "mail"
 - **Customize Colors**: Change the stroke color of any icon
 - **Resize Safely**: Icons are vectors so they scale perfectly
-- **Create Variants**: Use as a base for your own icon component variants
-- **Export**: Use Figma's export tools to get SVG, PNG, or other formats
 
 ## Troubleshooting
 
@@ -50,14 +44,9 @@
 - Check that `dist/code.js` and `dist/ui.js` exist
 
 **Import takes too long?**
-- This is normal for 1,000+ icons
+- This is normal for 1,700+ icons
 - Close other plugins during import
 - Be patient - it's worth the wait!
-
-**Icons look wrong?**
-- Icons are stroked by default (not filled)
-- Change the stroke color in Figma's design panel
-- Make sure stroke weight is set to 2 for best appearance
 
 ## Development
 

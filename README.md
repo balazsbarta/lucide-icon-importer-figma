@@ -47,27 +47,22 @@ A Figma plugin that imports all Lucide icons into your design, automatically fla
 After importing, you'll have:
 
 - **Individual Frames**: Each icon in its own 64x64px frame with the icon name
-- **Vector Shapes**: Icons converted to single vector paths for easy editing
-- **Components** (if enabled): Ready-to-use components with proper naming
-- **Rich Descriptions**: Component descriptions include:
-  - Icon name
-  - Related keywords for search
-  - Category classifications
+- **Vector Shapes**: Icons converted to single vector paths for easy editing and replacement
+- **Components**: Ready-to-use components with proper naming
+- **Rich Descriptions**: Official tags for search
 
 ## Icon Organization
 
 Icons are laid out in a grid with:
 - 20 icons per row
-- 80px spacing between icons
+- 40px spacing between icons
 - 24x24px icon size within 64x64px frames
 - Alphabetical ordering
 
 ## Example Component Description
 
 ```
-Lucide icon: home
-Keywords: house, building, residence, homepage, main
-Categories: navigation, buildings
+house, building, residence, homepage, main
 ```
 
 ## Development
@@ -103,11 +98,6 @@ This will watch for file changes and rebuild automatically.
 
 ## Customization
 
-### Adding More Icons
-The plugin includes a fallback set of popular icons, but you can extend it by:
-1. Modifying the `getLucideIconsData()` function in `src/code.ts`
-2. Adding SVG data and metadata for additional icons
-
 ### Changing Layout
 Adjust the grid layout by modifying these constants in `src/code.ts`:
 ```typescript
@@ -119,22 +109,6 @@ const SPACING = 80;        // Spacing between frames
 
 ### Icon Data Generation
 Keywords and categories are automatically generated using semantic analysis in `scripts/generate-icons.js`. The script analyzes icon names and applies comprehensive semantic mappings to generate relevant keywords for each icon.
-
-## Technical Details
-
-### SVG Processing
-The plugin includes a custom SVG parser that:
-- Extracts path data from SVG strings
-- Converts basic shapes (lines, circles, rectangles) to paths
-- Handles stroke and fill properties
-- Creates Figma vector nodes with proper styling
-
-### Component Features
-Created components include:
-- Proper naming (kebab-case)
-- Searchable descriptions with keywords
-- Category classifications
-- Consistent sizing and styling
 
 ## Troubleshooting
 
@@ -152,14 +126,6 @@ Created components include:
 - Check that you have sufficient memory and processing power
 - Try importing smaller batches if issues persist
 - Restart Figma if the plugin becomes unresponsive
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly in Figma
-5. Submit a pull request
 
 ## License
 
