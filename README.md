@@ -87,14 +87,15 @@ This will watch for file changes and rebuild automatically.
 ### Project Structure
 
 ```
-├── manifest.json          # Figma plugin manifest
-├── ui.html                # Plugin UI interface
+├── manifest.json              # Figma plugin manifest
+├── ui.html                    # Plugin UI interface
 ├── src/
-│   ├── code.ts            # Main plugin logic (runs in Figma)
-│   ├── ui.ts              # UI script (runs in iframe)
-│   ├── lucide-data.ts     # Icon data and metadata
-│   └── svg-parser.ts      # SVG to Figma vector conversion
-├── dist/                  # Built JavaScript files
+│   ├── code.ts                # Main plugin logic (runs in Figma)
+│   ├── ui.ts                  # UI script (runs in iframe)
+│   └── lucide-icons-data.ts   # Generated icon data with SVG strings and keywords
+├── scripts/
+│   └── generate-icons.js      # Script to generate icon data from Lucide package
+├── dist/                      # Built JavaScript files
 │   ├── code.js
 │   └── ui.js
 └── package.json
@@ -116,8 +117,8 @@ const COLS = 20;           // Number of columns
 const SPACING = 80;        // Spacing between frames
 ```
 
-### Custom Keywords
-Edit the keyword mappings in `src/lucide-data.ts` to customize search terms for each icon.
+### Icon Data Generation
+Keywords and categories are automatically generated using semantic analysis in `scripts/generate-icons.js`. The script analyzes icon names and applies comprehensive semantic mappings to generate relevant keywords for each icon.
 
 ## Technical Details
 

@@ -9,7 +9,6 @@
     "dev": "npx webpack --mode=development --watch"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.60",
     "lucide": "^0.445.0"
   },
   "devDependencies": {
