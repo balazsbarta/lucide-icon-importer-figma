@@ -1,97 +1,269 @@
 // Script to generate the complete Lucide icons data for the Figma plugin
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 
 // Import the lucide library
 const lucide = require('lucide');
 
 console.log('Generating Lucide icons data...');
 
-// Function to fetch official Lucide metadata from GitHub
-async function fetchOfficialLucideMetadata(iconName) {
-  return new Promise((resolve) => {
-    try {
-      // Convert PascalCase to kebab-case for file lookup
-      const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-      
-      // URL to the official Lucide metadata on GitHub
-      const metadataUrl = `https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/${kebabName}.json`;
-      
-      https.get(metadataUrl, (res) => {
-        if (res.statusCode === 200) {
-          let data = '';
-          res.on('data', (chunk) => {
-            data += chunk;
-          });
-          res.on('end', () => {
-            try {
-              const metadata = JSON.parse(data);
-              resolve({
-                tags: metadata.tags || [],
-                categories: metadata.categories || [],
-                contributors: metadata.contributors || []
-              });
-            } catch (error) {
-              resolve({ tags: [], categories: [], contributors: [] });
-            }
-          });
-        } else {
-          resolve({ tags: [], categories: [], contributors: [] });
-        }
-      }).on('error', () => {
-        resolve({ tags: [], categories: [], contributors: [] });
-      });
-    } catch (error) {
-      resolve({ tags: [], categories: [], contributors: [] });
+// Smart semantic keyword generator for Lucide icons
+function getIconKeywords(iconName) {
+  // Convert PascalCase to kebab-case for analysis
+  const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+  const nameWords = kebabName.split('-').filter(word => word.length > 1);
+  
+  let keywords = new Set(nameWords); // Start with the name words
+  
+  // Category-based semantic keywords
+  const semanticMap = {
+    // Navigation & Arrows
+    arrow: ['direction', 'navigation', 'pointer', 'movement'],
+    chevron: ['direction', 'navigation', 'expand', 'collapse'],
+    triangle: ['shape', 'direction', 'pointer'],
+    corner: ['direction', 'turn', 'angle'],
+    
+    // Actions & Controls
+    play: ['media', 'start', 'begin', 'video', 'audio'],
+    pause: ['media', 'stop', 'halt', 'break'],
+    stop: ['media', 'end', 'halt', 'square'],
+    skip: ['media', 'next', 'forward', 'jump'],
+    rewind: ['media', 'back', 'previous', 'reverse'],
+    volume: ['audio', 'sound', 'speaker', 'music'],
+    
+    // Files & Data
+    file: ['document', 'data', 'storage', 'text'],
+    folder: ['directory', 'organize', 'collection', 'group'],
+    archive: ['compress', 'backup', 'storage', 'save'],
+    download: ['save', 'import', 'get', 'receive'],
+    upload: ['send', 'export', 'share', 'publish'],
+    cloud: ['storage', 'sync', 'backup', 'online'],
+    database: ['data', 'storage', 'server', 'records'],
+    
+    // Communication & Social
+    message: ['chat', 'communication', 'text', 'talk'],
+    mail: ['email', 'envelope', 'send', 'contact'],
+    phone: ['call', 'contact', 'device', 'mobile'],
+    user: ['person', 'account', 'profile', 'member'],
+    users: ['people', 'team', 'group', 'community'],
+    heart: ['love', 'favorite', 'like', 'bookmark'],
+    star: ['favorite', 'rating', 'bookmark', 'important'],
+    
+    // Interface & Editing
+    edit: ['modify', 'change', 'write', 'pencil'],
+    plus: ['add', 'create', 'new', 'increase'],
+    minus: ['subtract', 'remove', 'decrease', 'less'],
+    x: ['close', 'cancel', 'exit', 'delete', 'remove'],
+    check: ['confirm', 'approve', 'done', 'success'],
+    search: ['find', 'magnify', 'lookup', 'filter'],
+    settings: ['config', 'preferences', 'options', 'gear'],
+    
+    // Security & Privacy
+    lock: ['secure', 'private', 'protected', 'safety'],
+    unlock: ['open', 'access', 'public', 'free'],
+    eye: ['view', 'visible', 'watch', 'see'],
+    shield: ['protection', 'security', 'defense', 'guard'],
+    key: ['password', 'access', 'security', 'login'],
+    
+    // Technology & Devices
+    wifi: ['internet', 'connection', 'wireless', 'network'],
+    bluetooth: ['wireless', 'connection', 'device', 'pair'],
+    battery: ['power', 'energy', 'charge', 'device'],
+    monitor: ['screen', 'display', 'computer', 'desktop'],
+    smartphone: ['mobile', 'device', 'phone', 'app'],
+    laptop: ['computer', 'notebook', 'device', 'portable'],
+    camera: ['photo', 'picture', 'capture', 'image'],
+    
+    // Layout & Alignment
+    align: ['layout', 'position', 'arrange', 'organize'],
+    center: ['middle', 'position', 'layout', 'balance'],
+    left: ['position', 'layout', 'align', 'direction'],
+    right: ['position', 'layout', 'align', 'direction'],
+    vertical: ['layout', 'position', 'column', 'orientation'],
+    horizontal: ['layout', 'position', 'row', 'orientation'],
+    justify: ['layout', 'position', 'space', 'distribute'],
+    
+    // Time & Calendar
+    calendar: ['date', 'schedule', 'event', 'time'],
+    clock: ['time', 'hour', 'watch', 'schedule'],
+    alarm: ['alert', 'reminder', 'wake', 'notification'],
+    timer: ['countdown', 'stopwatch', 'duration', 'measure'],
+    
+    // Weather & Nature
+    sun: ['weather', 'day', 'bright', 'light'],
+    moon: ['night', 'dark', 'lunar', 'evening'],
+    cloud: ['weather', 'sky', 'overcast'],
+    rain: ['weather', 'water', 'precipitation', 'storm'],
+    snow: ['weather', 'winter', 'cold', 'precipitation'],
+    wind: ['weather', 'air', 'breeze', 'movement'],
+    
+    // Transportation
+    car: ['vehicle', 'transport', 'drive', 'automobile'],
+    plane: ['flight', 'travel', 'airport', 'aviation'],
+    train: ['railway', 'transport', 'station', 'locomotive'],
+    bike: ['bicycle', 'cycling', 'exercise', 'ride'],
+    ship: ['boat', 'ocean', 'water', 'maritime'],
+    
+    // Shopping & Commerce
+    shopping: ['buy', 'purchase', 'store', 'retail'],
+    cart: ['shopping', 'basket', 'buy', 'ecommerce'],
+    bag: ['shopping', 'carry', 'purchase', 'store'],
+    credit: ['payment', 'money', 'finance', 'card'],
+    dollar: ['money', 'currency', 'price', 'cost'],
+    gift: ['present', 'surprise', 'celebration', 'giving'],
+    
+    // Health & Medical
+    activity: ['health', 'fitness', 'heartbeat', 'exercise'],
+    pill: ['medicine', 'medication', 'health', 'drug'],
+    thermometer: ['temperature', 'fever', 'health', 'measure'],
+    stethoscope: ['medical', 'doctor', 'health', 'diagnosis'],
+    
+    // Education & Learning
+    book: ['read', 'education', 'knowledge', 'study'],
+    graduation: ['education', 'university', 'degree', 'achievement'],
+    bookmark: ['save', 'mark', 'favorite', 'reference'],
+    pencil: ['write', 'draw', 'edit', 'school'],
+    
+    // Business & Work
+    briefcase: ['business', 'work', 'professional', 'office'],
+    building: ['office', 'business', 'company', 'structure'],
+    chart: ['analytics', 'data', 'statistics', 'graph'],
+    trending: ['analytics', 'growth', 'statistics', 'chart'],
+    
+    // Gaming & Entertainment
+    gamepad: ['gaming', 'controller', 'play', 'console'],
+    dice: ['gaming', 'random', 'chance', 'game'],
+    trophy: ['award', 'achievement', 'winner', 'prize'],
+    
+    // Tools & Construction
+    hammer: ['tool', 'construction', 'build', 'repair'],
+    wrench: ['tool', 'repair', 'fix', 'maintenance'],
+    screwdriver: ['tool', 'repair', 'construction', 'fix'],
+    
+    // Maps & Location
+    map: ['location', 'navigation', 'geography', 'travel'],
+    compass: ['direction', 'navigation', 'orientation', 'travel'],
+    globe: ['world', 'earth', 'international', 'global'],
+    
+    // Home & Furniture
+    home: ['house', 'building', 'residence', 'main'],
+    door: ['entrance', 'exit', 'access', 'portal'],
+    window: ['view', 'opening', 'glass', 'light'],
+    bed: ['sleep', 'rest', 'furniture', 'bedroom'],
+    
+    // Food & Dining
+    coffee: ['drink', 'beverage', 'cafe', 'morning'],
+    pizza: ['food', 'italian', 'meal', 'dinner'],
+    cake: ['dessert', 'celebration', 'birthday', 'sweet'],
+    utensils: ['food', 'dining', 'eating', 'cutlery'],
+    
+    // Media & Entertainment
+    video: ['media', 'movie', 'film', 'recording'],
+    image: ['photo', 'picture', 'graphic', 'visual'],
+    music: ['audio', 'sound', 'song', 'melody'],
+    
+    // Accessibility & Support
+    accessibility: ['a11y', 'access', 'support', 'inclusive'],
+    
+    // Air & Ventilation
+    air: ['ventilation', 'breath', 'atmosphere', 'oxygen'],
+    vent: ['ventilation', 'airflow', 'circulation', 'hvac'],
+    
+    // Collections & Albums
+    album: ['collection', 'gallery', 'photos', 'music']
+  };
+  
+  // Add semantic keywords based on exact word matches first
+  nameWords.forEach(word => {
+    if (semanticMap[word]) {
+      semanticMap[word].forEach(keyword => keywords.add(keyword));
     }
   });
-}
-
-// Function to get official Lucide metadata for an icon (local fallback)
-function getOfficialLucideMetadata(iconName) {
-  try {
-    // Convert PascalCase to kebab-case for file lookup
-    const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-    
-    // Try to read the official metadata file from lucide package
-    const metadataPath = path.join(__dirname, '../node_modules/lucide/icons', `${kebabName}.json`);
-    
-    if (fs.existsSync(metadataPath)) {
-      const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-      return {
-        tags: metadata.tags || [],
-        categories: metadata.categories || [],
-        contributors: metadata.contributors || []
-      };
-    } else {
-      // Try alternative naming patterns if the standard one doesn't work
-      const alternativeNames = [
-        iconName.toLowerCase(), // lowercase
-        iconName, // original PascalCase
-        kebabName.replace(/-/g, '_') // snake_case
-      ];
-      
-      for (const altName of alternativeNames) {
-        const altPath = path.join(__dirname, '../node_modules/lucide/icons', `${altName}.json`);
-        if (fs.existsSync(altPath)) {
-          const metadata = JSON.parse(fs.readFileSync(altPath, 'utf8'));
-          return {
-            tags: metadata.tags || [],
-            categories: metadata.categories || [],
-            contributors: metadata.contributors || []
-          };
+  
+  // Add semantic keywords based on partial matches
+  nameWords.forEach(word => {
+    Object.keys(semanticMap).forEach(key => {
+      // Only match if the word contains the key or vice versa (but not too loose)
+      if (word.length > 2 && key.length > 2) {
+        if (word.includes(key) && word !== key) {
+          semanticMap[key].forEach(keyword => keywords.add(keyword));
+        }
+        if (key.includes(word) && key !== word) {
+          semanticMap[key].forEach(keyword => keywords.add(keyword));
         }
       }
+    });
+  });
+  
+  // Add contextual keywords based on common patterns
+  nameWords.forEach(word => {
+    // State and direction keywords
+    if (['up', 'down', 'left', 'right'].includes(word)) {
+      ['direction', 'movement', 'orientation'].forEach(k => keywords.add(k));
     }
-  } catch (error) {
-    // Only log if it's not a simple file not found case
-    if (error.code !== 'ENOENT') {
-      console.warn(`Could not load metadata for ${iconName}:`, error.message);
+    if (['open', 'close', 'closed'].includes(word)) {
+      ['state', 'toggle', 'visibility'].forEach(k => keywords.add(k));
+    }
+    if (['on', 'off', 'enabled', 'disabled'].includes(word)) {
+      ['state', 'toggle', 'control'].forEach(k => keywords.add(k));
+    }
+    if (['big', 'small', 'large', 'mini', 'tiny'].includes(word)) {
+      ['size', 'scale', 'dimension'].forEach(k => keywords.add(k));
+    }
+    if (['fast', 'slow', 'quick', 'speed'].includes(word)) {
+      ['performance', 'velocity', 'tempo'].forEach(k => keywords.add(k));
+    }
+    
+    // Color and appearance
+    if (['color', 'paint', 'brush', 'palette'].includes(word)) {
+      ['design', 'art', 'creative', 'visual'].forEach(k => keywords.add(k));
+    }
+    
+    // Numbers and counting
+    if (['one', 'two', 'three', 'first', 'second', 'last'].includes(word) || /^\d+$/.test(word)) {
+      ['number', 'count', 'order', 'sequence'].forEach(k => keywords.add(k));
+    }
+  });
+  
+  // Add category-based keywords based on full icon name patterns
+  if (kebabName.includes('arrow') || kebabName.includes('chevron')) {
+    ['navigation', 'direction', 'ui', 'interface'].forEach(k => keywords.add(k));
+  }
+  if (kebabName.includes('circle') || kebabName.includes('square') || kebabName.includes('triangle')) {
+    ['shape', 'geometric', 'form', 'basic'].forEach(k => keywords.add(k));
+  }
+  if (kebabName.includes('alert') || kebabName.includes('warning') || kebabName.includes('danger')) {
+    ['notification', 'attention', 'important', 'status'].forEach(k => keywords.add(k));
+  }
+  if (kebabName.includes('wifi') || kebabName.includes('signal') || kebabName.includes('network')) {
+    ['connection', 'internet', 'communication', 'wireless'].forEach(k => keywords.add(k));
+  }
+  
+  // Ensure every icon has at least some basic keywords
+  if (keywords.size <= nameWords.length) {
+    // Add general UI/interface keywords for icons that don't match patterns
+    ['ui', 'interface', 'icon', 'design'].forEach(k => keywords.add(k));
+    
+    // Add keywords based on common icon categories
+    if (kebabName.includes('text') || kebabName.includes('font') || kebabName.includes('type')) {
+      ['typography', 'text', 'content'].forEach(k => keywords.add(k));
+    }
+    if (kebabName.includes('layout') || kebabName.includes('grid') || kebabName.includes('columns')) {
+      ['layout', 'design', 'structure'].forEach(k => keywords.add(k));
     }
   }
   
-  return { tags: [], categories: [], contributors: [] };
+  // Convert Set to Array and filter appropriately
+  const result = Array.from(keywords).filter(keyword => 
+    keyword.length > 1 // Keep all meaningful keywords
+  ).sort();
+  
+  // Ensure we always have at least 3 keywords
+  if (result.length < 3) {
+    result.push('ui', 'interface', 'design');
+  }
+  
+  return result;
 }
 
 const allIcons = {};
@@ -139,264 +311,6 @@ function lucideToSvg(iconData) {
   return `<svg ${attrString}>${renderChildren(children)}</svg>`;
 }
 
-// Function to get keywords for an icon using enhanced semantic analysis
-function getIconKeywords(iconName) {
-  // Convert PascalCase to kebab-case for analysis
-  const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-  const nameWords = kebabName.split('-');
-  
-  // Enhanced keyword mapping based on Lucide/Feather design principles
-  const keywordMap = {
-    // Food & Dining
-    'cake': ['birthday', 'celebration', 'dessert', 'party', 'sweet', 'food', 'treat', 'anniversary', 'festive', 'bakery', 'slice'],
-    'pizza': ['food', 'italian', 'slice', 'restaurant', 'meal', 'dinner', 'cheese', 'delivery', 'fast-food'],
-    'coffee': ['drink', 'beverage', 'cafe', 'morning', 'espresso', 'cup', 'hot', 'caffeine', 'break'],
-    'wine': ['alcohol', 'drink', 'beverage', 'glass', 'restaurant', 'celebration', 'grape', 'bottle'],
-    'beer': ['alcohol', 'drink', 'beverage', 'pub', 'bar', 'bottle', 'glass', 'celebration'],
-    'utensils': ['food', 'dining', 'restaurant', 'eating', 'cutlery', 'knife', 'fork', 'meal'],
-    'chef-hat': ['cooking', 'chef', 'kitchen', 'restaurant', 'culinary', 'food', 'professional'],
-    
-    // Navigation & Arrows
-    'home': ['house', 'building', 'residence', 'start', 'main', 'dashboard', 'homepage'],
-    'arrow-up': ['top', 'increase', 'north', 'ascend', 'rise', 'upward', 'above', 'direction'],
-    'arrow-down': ['bottom', 'decrease', 'south', 'descend', 'fall', 'downward', 'below', 'direction'],
-    'arrow-left': ['back', 'previous', 'west', 'return', 'undo', 'leftward', 'reverse', 'direction'],
-    'arrow-right': ['forward', 'next', 'east', 'continue', 'proceed', 'rightward', 'advance', 'direction'],
-    'chevron-up': ['collapse', 'up', 'expand', 'accordion', 'dropdown', 'direction'],
-    'chevron-down': ['expand', 'down', 'collapse', 'accordion', 'dropdown', 'direction'],
-    'chevron-left': ['previous', 'back', 'left', 'navigation', 'direction'],
-    'chevron-right': ['next', 'forward', 'right', 'navigation', 'direction'],
-    
-    // Communication & Social
-    'heart': ['love', 'like', 'favorite', 'health', 'romance', 'bookmark', 'care', 'affection'],
-    'star': ['favorite', 'rating', 'bookmark', 'important', 'quality', 'award', 'premium', 'featured'],
-    'message-circle': ['chat', 'communication', 'conversation', 'talk', 'discuss', 'feedback'],
-    'mail': ['email', 'message', 'envelope', 'letter', 'communication', 'inbox', 'send', 'contact'],
-    'phone': ['call', 'telephone', 'contact', 'mobile', 'device', 'communication', 'dial'],
-    'users': ['people', 'team', 'group', 'community', 'social', 'crowd', 'audience'],
-    'user': ['person', 'account', 'profile', 'avatar', 'member', 'customer', 'individual'],
-    'thumbs-up': ['like', 'approve', 'good', 'positive', 'recommend', 'agree', 'success'],
-    'thumbs-down': ['dislike', 'disapprove', 'bad', 'negative', 'disagree', 'reject'],
-    
-    // Technology & Digital
-    'search': ['find', 'magnify', 'lookup', 'seek', 'explore', 'discover', 'filter', 'query'],
-    'settings': ['config', 'gear', 'preferences', 'options', 'tools', 'admin', 'control'],
-    'wifi': ['internet', 'connection', 'network', 'wireless', 'signal', 'connectivity', 'online'],
-    'battery': ['power', 'energy', 'charge', 'electricity', 'device', 'fuel', 'level'],
-    'smartphone': ['mobile', 'phone', 'device', 'cellular', 'app', 'technology'],
-    'laptop': ['computer', 'notebook', 'device', 'work', 'technology', 'portable'],
-    'monitor': ['screen', 'display', 'computer', 'desktop', 'television', 'viewing'],
-    'database': ['data', 'storage', 'server', 'information', 'records', 'archive'],
-    'cloud': ['weather', 'sky', 'storage', 'data', 'online', 'overcast', 'computing', 'backup'],
-    
-    // Media & Entertainment
-    'play': ['start', 'begin', 'media', 'video', 'audio', 'music', 'entertainment'],
-    'pause': ['stop', 'halt', 'media', 'break', 'suspend', 'freeze'],
-    'volume': ['audio', 'sound', 'speaker', 'music', 'noise', 'level'],
-    'camera': ['photo', 'picture', 'photography', 'capture', 'snapshot', 'image', 'lens', 'media'],
-    'video': ['movie', 'film', 'recording', 'media', 'play', 'streaming', 'cinema'],
-    'music': ['audio', 'sound', 'song', 'melody', 'tune', 'player', 'entertainment'],
-    'headphones': ['audio', 'music', 'sound', 'listening', 'earphones', 'device'],
-    'radio': ['broadcast', 'audio', 'music', 'listening', 'station', 'wireless'],
-    
-    // Files & Organization
-    'file': ['document', 'paper', 'record', 'data', 'text', 'attachment', 'storage'],
-    'folder': ['directory', 'collection', 'group', 'organize', 'container', 'archive', 'category'],
-    'image': ['photo', 'picture', 'graphic', 'visual', 'media', 'illustration', 'artwork'],
-    'download': ['save', 'import', 'get', 'receive', 'fetch', 'install', 'transfer'],
-    'upload': ['send', 'export', 'share', 'transfer', 'publish', 'submit', 'post'],
-    'trash': ['delete', 'remove', 'garbage', 'waste', 'discard', 'bin', 'destroy'],
-    'archive': ['storage', 'backup', 'compress', 'organize', 'save', 'preserve'],
-    
-    // Actions & Interface
-    'edit': ['modify', 'change', 'update', 'write', 'pencil', 'customize', 'alter'],
-    'plus': ['add', 'create', 'new', 'increase', 'positive', 'expand', 'insert'],
-    'minus': ['subtract', 'remove', 'decrease', 'negative', 'less', 'reduce', 'delete'],
-    'check': ['confirm', 'approve', 'done', 'complete', 'verified', 'success', 'valid', 'tick'],
-    'x': ['close', 'cancel', 'exit', 'remove', 'delete', 'dismiss', 'error', 'cross'],
-    'copy': ['duplicate', 'clone', 'replicate', 'reproduction', 'backup'],
-    'cut': ['remove', 'delete', 'slice', 'trim', 'separate'],
-    'paste': ['insert', 'place', 'add', 'attach', 'apply'],
-    
-    // Security & Privacy
-    'lock': ['secure', 'private', 'protected', 'safety', 'closed', 'encrypted', 'restricted'],
-    'unlock': ['open', 'access', 'available', 'public', 'free', 'unrestricted', 'accessible'],
-    'eye': ['view', 'see', 'visible', 'watch', 'observe', 'preview', 'visibility'],
-    'eye-off': ['hide', 'invisible', 'private', 'secret', 'hidden', 'concealed', 'blind'],
-    'shield': ['protection', 'security', 'defense', 'safety', 'guard', 'firewall'],
-    'key': ['password', 'access', 'unlock', 'security', 'login', 'authentication'],
-    
-    // Time & Calendar
-    'calendar': ['date', 'schedule', 'time', 'event', 'appointment', 'planning', 'organize'],
-    'clock': ['time', 'hour', 'minute', 'watch', 'timer', 'schedule', 'duration'],
-    'alarm-clock': ['wake', 'alert', 'reminder', 'time', 'morning', 'notification'],
-    'stopwatch': ['timer', 'measure', 'time', 'duration', 'sport', 'racing'],
-    
-    // Weather & Nature
-    'sun': ['light', 'day', 'bright', 'weather', 'solar', 'sunshine', 'morning', 'warm'],
-    'moon': ['night', 'dark', 'lunar', 'sleep', 'evening', 'crescent', 'nighttime'],
-    'star': ['night', 'space', 'astronomy', 'celestial', 'bright', 'twinkle'],
-    'umbrella': ['rain', 'weather', 'protection', 'cover', 'shield', 'shelter', 'safety'],
-    'tree': ['nature', 'plant', 'forest', 'environment', 'green', 'growth', 'wood'],
-    'flower': ['nature', 'plant', 'garden', 'beautiful', 'bloom', 'petal', 'spring'],
-    
-    // Transportation
-    'car': ['vehicle', 'transport', 'drive', 'automobile', 'travel', 'road', 'transportation', 'motor'],
-    'plane': ['flight', 'travel', 'airport', 'aviation', 'transportation', 'journey', 'aircraft', 'fly'],
-    'train': ['railway', 'transport', 'travel', 'locomotive', 'station', 'track'],
-    'bike': ['bicycle', 'cycling', 'transport', 'exercise', 'sport', 'pedal', 'ride'],
-    'ship': ['boat', 'ocean', 'water', 'transport', 'sailing', 'maritime', 'vessel'],
-    
-    // Shopping & Commerce
-    'shopping-cart': ['store', 'buy', 'purchase', 'ecommerce', 'retail', 'basket', 'checkout', 'commerce'],
-    'shopping-bag': ['store', 'purchase', 'retail', 'bag', 'shopping', 'carry', 'buy'],
-    'credit-card': ['payment', 'money', 'finance', 'purchase', 'banking', 'transaction'],
-    'dollar-sign': ['money', 'currency', 'price', 'cost', 'finance', 'payment', 'cash'],
-    'gift': ['present', 'surprise', 'birthday', 'celebration', 'holiday', 'package', 'reward', 'giving'],
-    
-    // Health & Medical
-    'activity': ['health', 'fitness', 'exercise', 'heartbeat', 'vital', 'monitor'],
-    'pill': ['medicine', 'drug', 'medication', 'health', 'pharmacy', 'treatment'],
-    'thermometer': ['temperature', 'fever', 'health', 'medical', 'measure', 'heat'],
-    'stethoscope': ['medical', 'doctor', 'health', 'diagnosis', 'healthcare', 'physician'],
-    'hospital': ['medical', 'health', 'care', 'emergency', 'treatment', 'clinic'],
-    'bandage': ['medical', 'injury', 'wound', 'first-aid', 'healing', 'healthcare'],
-    
-    // Education & Learning
-    'book': ['read', 'literature', 'education', 'knowledge', 'study', 'novel', 'library', 'learning'],
-    'graduation-cap': ['education', 'university', 'degree', 'learning', 'student', 'achievement'],
-    'bookmark': ['save', 'mark', 'remember', 'favorite', 'reference', 'note'],
-    'pencil': ['write', 'edit', 'draw', 'sketch', 'note', 'school', 'creative'],
-    'book-open': ['reading', 'study', 'education', 'knowledge', 'learning', 'text'],
-    'library': ['books', 'education', 'study', 'knowledge', 'research', 'archive'],
-    
-    // Business & Finance
-    'briefcase': ['business', 'work', 'professional', 'office', 'career', 'job'],
-    'building': ['office', 'business', 'company', 'corporate', 'workplace', 'structure'],
-    'chart': ['analytics', 'data', 'statistics', 'business', 'graph', 'report'],
-    'trending-up': ['growth', 'increase', 'profit', 'success', 'analytics', 'chart'],
-    'trending-down': ['decline', 'decrease', 'loss', 'analytics', 'chart', 'drop'],
-    'calculator': ['math', 'finance', 'accounting', 'numbers', 'business', 'compute'],
-    
-    // Alerts & Status
-    'alert-triangle': ['warning', 'caution', 'danger', 'attention', 'error', 'important'],
-    'info': ['information', 'details', 'help', 'about', 'question', 'explain'],
-    'check-circle': ['success', 'complete', 'done', 'approved', 'verified', 'confirmed'],
-    'x-circle': ['error', 'failed', 'cancel', 'remove', 'delete', 'wrong'],
-    'bell': ['notification', 'alert', 'reminder', 'alarm', 'ring', 'sound'],
-    
-    // Gaming & Entertainment
-    'gamepad': ['gaming', 'controller', 'play', 'entertainment', 'console', 'joystick'],
-    'dice': ['gaming', 'random', 'chance', 'game', 'gambling', 'probability'],
-    'trophy': ['award', 'achievement', 'winner', 'success', 'prize', 'victory'],
-    'medal': ['award', 'achievement', 'honor', 'recognition', 'prize', 'success'],
-    
-    // Construction & Tools
-    'hammer': ['tool', 'construction', 'build', 'repair', 'craft', 'work'],
-    'wrench': ['tool', 'repair', 'fix', 'maintenance', 'mechanical', 'adjust'],
-    'screwdriver': ['tool', 'repair', 'fix', 'construction', 'maintenance', 'build'],
-    'drill': ['tool', 'construction', 'hole', 'build', 'work', 'power-tool'],
-    
-    // Maps & Location
-    'map': ['location', 'geography', 'navigation', 'travel', 'directions', 'place'],
-    'map-pin': ['location', 'marker', 'place', 'position', 'coordinates', 'pin'],
-    'compass': ['direction', 'navigation', 'north', 'orientation', 'travel', 'guide'],
-    'globe': ['world', 'earth', 'international', 'global', 'planet', 'geography'],
-    
-    // Furniture & Home
-    'sofa': ['furniture', 'home', 'living-room', 'comfort', 'seating', 'couch'],
-    'bed': ['furniture', 'sleep', 'bedroom', 'rest', 'home', 'comfort'],
-    'lamp': ['light', 'illumination', 'furniture', 'home', 'bright', 'bulb'],
-    'door': ['entrance', 'exit', 'home', 'access', 'portal', 'gateway']
-  };
-  
-  // Start with base keywords from the icon name
-  let keywords = [...nameWords];
-  
-  // Add exact match keywords if available
-  if (keywordMap[kebabName]) {
-    keywords = [...keywords, ...keywordMap[kebabName]];
-  }
-  
-  // Add semantic keywords based on word patterns
-  nameWords.forEach(word => {
-    // Direction and movement
-    if (['arrow', 'chevron', 'triangle'].includes(word)) {
-      keywords.push('direction', 'navigation', 'pointer');
-    }
-    if (['up', 'down', 'left', 'right'].includes(word)) {
-      keywords.push('direction', 'movement');
-    }
-    
-    // Shapes and geometry
-    if (['circle', 'square', 'triangle', 'diamond'].includes(word)) {
-      keywords.push('shape', 'geometric', 'form');
-    }
-    
-    // Actions and states
-    if (['check', 'verified', 'confirm'].includes(word)) {
-      keywords.push('success', 'valid', 'approved');
-    }
-    if (['alert', 'warning', 'danger'].includes(word)) {
-      keywords.push('attention', 'caution', 'important');
-    }
-    if (['play', 'pause', 'stop'].includes(word)) {
-      keywords.push('media', 'control', 'player');
-    }
-    
-    // Technology patterns
-    if (['wifi', 'signal', 'network'].includes(word)) {
-      keywords.push('connection', 'internet', 'wireless');
-    }
-    if (['battery', 'power', 'energy'].includes(word)) {
-      keywords.push('electricity', 'charge', 'device');
-    }
-    if (['volume', 'sound', 'audio'].includes(word)) {
-      keywords.push('music', 'speaker', 'hearing');
-    }
-    
-    // File and data
-    if (['file', 'document', 'folder'].includes(word)) {
-      keywords.push('storage', 'data', 'organize');
-    }
-    if (['download', 'upload', 'cloud'].includes(word)) {
-      keywords.push('transfer', 'sync', 'backup');
-    }
-    
-    // Communication
-    if (['message', 'mail', 'chat'].includes(word)) {
-      keywords.push('communication', 'contact', 'social');
-    }
-    if (['phone', 'call', 'mobile'].includes(word)) {
-      keywords.push('device', 'communication', 'contact');
-    }
-    
-    // Time and scheduling
-    if (['calendar', 'clock', 'time'].includes(word)) {
-      keywords.push('schedule', 'appointment', 'date');
-    }
-    
-    // User and social
-    if (['user', 'users', 'person'].includes(word)) {
-      keywords.push('account', 'profile', 'people');
-    }
-    if (['heart', 'like', 'favorite'].includes(word)) {
-      keywords.push('love', 'preference', 'bookmark');
-    }
-    
-    // Security and privacy
-    if (['lock', 'unlock', 'key'].includes(word)) {
-      keywords.push('security', 'access', 'protection');
-    }
-    if (['eye', 'visible', 'hidden'].includes(word)) {
-      keywords.push('visibility', 'privacy', 'view');
-    }
-  });
-  
-  // Remove duplicates and return
-  return [...new Set(keywords)].filter(keyword => keyword.length > 1);
-}
-
 // Get all keys from lucide
 const allKeys = Object.keys(lucide);
 console.log(`Total lucide exports: ${allKeys.length}`);
@@ -413,9 +327,9 @@ const iconNames = allKeys.filter(key => {
 
 console.log(`Found ${iconNames.length} potential Lucide icons:`, iconNames.slice(0, 10));
 
-// Process all icons with enhanced fallback keywords (skip GitHub for now)
+// Process all icons with enhanced semantic keywords (no GitHub API)
 function processAllIcons() {
-  console.log('Processing all icons with enhanced fallback keywords...');
+  console.log('Processing all icons with enhanced semantic keywords...');
   
   for (let i = 0; i < iconNames.length; i++) {
     const iconName = iconNames[i];
@@ -428,7 +342,7 @@ function processAllIcons() {
         // Convert PascalCase to kebab-case for consistency
         const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
         
-        // Use enhanced fallback keywords
+        // Use enhanced semantic keywords
         const keywords = getIconKeywords(iconName);
         
         // Create description
@@ -467,12 +381,12 @@ processAllIcons();
 console.log(`Successfully processed ${processedCount} icons`);
 console.log(`Errors: ${errorCount}`);
 
-// All icons use fallback tags since we're not using GitHub API
+// All icons use enhanced semantic tags
 const iconsWithOfficialTags = 0;
-const iconsWithFallbackTags = processedCount;
+const iconsWithSemanticTags = processedCount;
 
 console.log(`Icons with official Lucide tags: ${iconsWithOfficialTags}`);
-console.log(`Icons using enhanced fallback tags: ${iconsWithFallbackTags}`);
+console.log(`Icons using enhanced semantic tags: ${iconsWithSemanticTags}`);
 console.log(`Note: Positioning preserved from original Lucide SVGs`);
 
 // Generate TypeScript content
@@ -480,7 +394,7 @@ const tsContent = `// Auto-generated Lucide icons data for Figma plugin
 // Generated on ${new Date().toISOString()}
 // Total icons: ${processedCount}
 // Icons with official tags: ${iconsWithOfficialTags}
-// Icons with fallback tags: ${iconsWithFallbackTags}
+// Icons with semantic tags: ${iconsWithSemanticTags}
 // Note: Original positioning preserved
 
 export const LUCIDE_ICONS_DATA = ${JSON.stringify(allIcons, null, 2)};
