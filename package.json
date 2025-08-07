@@ -1,7 +1,11 @@
 {
   "name": "lucide-icon-importer-figma",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Figma plugin that imports all Lucide icons and creates components with descriptions",
+  "author": {
+    "name": "baladesign",
+    "email": "info@hellobala.hu"
+  },
   "main": "code.js",
   "scripts": {
     "build": "npx webpack",
@@ -9,7 +13,7 @@
     "dev": "npx webpack --mode=development --watch"
   },
   "dependencies": {
-    "lucide": "^0.445.0"
+    "lucide": "^0.537.0"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.97.0",

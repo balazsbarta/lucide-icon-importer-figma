@@ -272,10 +272,10 @@ let errorCount = 0;
 
 // Function to convert Lucide icon data to SVG string
 function lucideToSvg(iconData) {
-  if (!Array.isArray(iconData) || iconData.length < 3) return null;
+  if (!Array.isArray(iconData) || iconData.length === 0) return null;
   
-  const [tagName, attributes, children] = iconData;
-  if (tagName !== 'svg') return null;
+  // New Lucide format: direct array of elements like [['path', {d: '...'}], ['circle', {cx: '...'}]]
+  // We need to wrap these in an SVG element
   
   // Convert children to SVG elements (preserve original positioning)
   function renderChildren(children) {
@@ -300,27 +300,37 @@ function lucideToSvg(iconData) {
     }).join('');
   }
   
-  // Preserve original SVG attributes exactly as they are
-  // This maintains the intended positioning and viewBox
-  const attrString = Object.entries(attributes)
+  // Create standard SVG wrapper with Lucide's default attributes
+  const svgAttributes = {
+    xmlns: 'http://www.w3.org/2000/svg',
+    width: '24',
+    height: '24',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round'
+  };
+  
+  const attrString = Object.entries(svgAttributes)
     .map(([key, value]) => `${key}="${value}"`)
     .join(' ');
   
   // Return SVG with original structure and positioning preserved
-  // Do NOT modify viewBox, width, height, or any positioning attributes
-  return `<svg ${attrString}>${renderChildren(children)}</svg>`;
+  return `<svg ${attrString}>${renderChildren(iconData)}</svg>`;
 }
 
 // Get all keys from lucide
 const allKeys = Object.keys(lucide);
 console.log(`Total lucide exports: ${allKeys.length}`);
 
-// Filter for actual icon data (arrays starting with 'svg')
+// Filter for actual icon data (now direct arrays instead of SVG-wrapped)
 const iconNames = allKeys.filter(key => {
   const value = lucide[key];
   return Array.isArray(value) && 
-         value.length >= 3 && 
-         value[0] === 'svg' &&
+         value.length > 0 && 
+         Array.isArray(value[0]) && // Each element should be an array like ['path', {...}]
          key !== 'icons' &&
          key !== 'default';
 });
@@ -357,8 +367,8 @@ function processAllIcons() {
           hasOfficialTags: false,
           // Preserve original positioning - don't force centering in Figma
           preservePositioning: true,
-          // Store original viewBox for reference
-          originalViewBox: iconData[1]?.viewBox || '0 0 24 24'
+          // Store original viewBox for reference (now standardized)
+          originalViewBox: '0 0 24 24'
         };
         
         processedCount++;
