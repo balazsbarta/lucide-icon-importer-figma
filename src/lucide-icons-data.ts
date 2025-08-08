@@ -1,8 +1,8 @@
 // Auto-generated Lucide icons data for Figma plugin
-// Generated on 2025-08-07T11:02:05.721Z
-// Total icons: 1843
+// Generated on 2025-08-08T18:20:26.840Z
+// Total icons: 1845
 // Icons with official tags: 0
-// Icons with semantic tags: 1843
+// Icons with semantic tags: 1845
 // Note: Original positioning preserved
 
 export const LUCIDE_ICONS_DATA = {
@@ -1300,7 +1300,7 @@ export const LUCIDE_ICONS_DATA = {
   },
   "apple": {
     "name": "apple",
-    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z\"/><path d=\"M10 2c1 .5 2 2 2 5\"/></svg>",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 6.528V3a1 1 0 0 1 1-1h0\"/><path d=\"M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21\"/></svg>",
     "keywords": [
       "apple",
       "design",
@@ -5836,6 +5836,24 @@ export const LUCIDE_ICONS_DATA = {
     ],
     "categories": [],
     "description": "brick-wall-fire icon from Lucide",
+    "hasOfficialTags": false,
+    "preservePositioning": true,
+    "originalViewBox": "0 0 24 24"
+  },
+  "brick-wall-shield": {
+    "name": "brick-wall-shield",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 9v1.258\"/><path d=\"M16 3v5.46\"/><path d=\"M21 9.118V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5.75\"/><path d=\"M22 17.5c0 2.499-1.75 3.749-3.83 4.474a.5.5 0 0 1-.335-.005c-2.085-.72-3.835-1.97-3.835-4.47V14a.5.5 0 0 1 .5-.499c1 0 2.25-.6 3.12-1.36a.6.6 0 0 1 .76-.001c.875.765 2.12 1.36 3.12 1.36a.5.5 0 0 1 .5.5z\"/><path d=\"M3 15h7\"/><path d=\"M3 9h12.142\"/><path d=\"M8 15v6\"/><path d=\"M8 3v6\"/></svg>",
+    "keywords": [
+      "brick",
+      "defense",
+      "guard",
+      "protection",
+      "security",
+      "shield",
+      "wall"
+    ],
+    "categories": [],
+    "description": "brick-wall-shield icon from Lucide",
     "hasOfficialTags": false,
     "preservePositioning": true,
     "originalViewBox": "0 0 24 24"
@@ -18325,6 +18343,22 @@ export const LUCIDE_ICONS_DATA = {
     "preservePositioning": true,
     "originalViewBox": "0 0 24 24"
   },
+  "kayak": {
+    "name": "kayak",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M18 17a1 1 0 0 0-1 1v1a2 2 0 1 0 2-2z\"/><path d=\"M20.97 3.61a.45.45 0 0 0-.58-.58C10.2 6.6 6.6 10.2 3.03 20.39a.45.45 0 0 0 .58.58C13.8 17.4 17.4 13.8 20.97 3.61\"/><path d=\"m6.707 6.707 10.586 10.586\"/><path d=\"M7 5a2 2 0 1 0-2 2h1a1 1 0 0 0 1-1z\"/></svg>",
+    "keywords": [
+      "design",
+      "icon",
+      "interface",
+      "kayak",
+      "ui"
+    ],
+    "categories": [],
+    "description": "kayak icon from Lucide",
+    "hasOfficialTags": false,
+    "preservePositioning": true,
+    "originalViewBox": "0 0 24 24"
+  },
   "key": {
     "name": "key",
     "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4\"/><path d=\"m21 2-9.6 9.6\"/><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"/></svg>",
@@ -21377,7 +21411,7 @@ export const LUCIDE_ICONS_DATA = {
   },
   "mic-off": {
     "name": "mic-off",
-    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"2\" x2=\"22\" y1=\"2\" y2=\"22\"/><path d=\"M18.89 13.23A7.12 7.12 0 0 0 19 12v-2\"/><path d=\"M5 10v2a7 7 0 0 0 12 5\"/><path d=\"M15 9.34V5a3 3 0 0 0-5.68-1.33\"/><path d=\"M9 9v3a3 3 0 0 0 5.12 2.12\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/></svg>",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 19v3\"/><path d=\"M15 9.34V5a3 3 0 0 0-5.68-1.33\"/><path d=\"M16.95 16.95A7 7 0 0 1 5 12v-2\"/><path d=\"M18.89 13.23A7 7 0 0 0 19 12v-2\"/><path d=\"m2 2 20 20\"/><path d=\"M9 9v3a3 3 0 0 0 5.12 2.12\"/></svg>",
     "keywords": [
       "beverage",
       "cafe",
@@ -30451,7 +30485,7 @@ export const LUCIDE_ICONS_DATA = {
   },
   "store": {
     "name": "store",
-    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\"/><path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\"/><path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\"/><path d=\"M2 7h20\"/><path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\"/></svg>",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5\"/><path d=\"M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244\"/><path d=\"M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05\"/></svg>",
     "keywords": [
       "design",
       "icon",

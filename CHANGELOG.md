@@ -2,6 +2,12 @@
 
 All notable changes to the Lucide Icon Importer plugin will be documented in this file.
 
+## [1.0.2] - 2025-08-08
+
+### Updated
+- **Lucide Library**: Updated from v0.537.0 to v0.539.0
+- **More Icons**: Increased from 1,843 to 1,845 icons (+2 new icons)
+
 ## [1.0.1] - 2025-08-07
 
 ### Updated
